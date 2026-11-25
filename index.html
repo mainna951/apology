@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>I’m sorry, kadoli 💌</title>
+<style>
+:root{--bg1:#ffd6e7;--bg2:#ffb3d1;--card:#fff;--text:#4a1d33;--accent:#e63a7a;--muted:#a05a78;color-scheme:light dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#2a1020;--bg2:#4a1d38;--card:#3a1830;--text:#ffe3ef;--accent:#ff5c9a;--muted:#e3a6c0}}
+:root[data-theme="dark"]{--bg1:#2a1020;--bg2:#4a1d38;--card:#3a1830;--text:#ffe3ef;--accent:#ff5c9a;--muted:#e3a6c0}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:Georgia,"Times New Roman",serif;background:linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--text);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.card{background:var(--card);border-radius:24px;padding:32px 26px;width:min(92vw,420px);text-align:center;box-shadow:0 12px 40px rgba(230,58,122,.25);min-height:320px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.emoji{font-size:48px}
+#msg{font-size:19px;line-height:1.55;min-height:120px;display:flex;align-items:center;justify-content:center;transition:opacity .35s}
+.sign{font-size:15px;color:var(--muted);font-style:italic}
+#taunt{font-size:15px;color:var(--muted);min-height:20px;font-style:italic}
+button{font:inherit;cursor:pointer;border:0;border-radius:999px;padding:12px 28px;font-size:18px}
+.primary{background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(230,58,122,.4)}
+.ghost{background:transparent;color:var(--muted);border:2px solid var(--muted)}
+.row{display:flex;gap:18px;justify-content:center;align-items:center;min-height:54px}
+#noSlot{display:inline-block;width:80px;height:48px}
+#no{transition:opacity .12s}
+#no.fixed{position:fixed;z-index:50}
+.heart{position:fixed;bottom:-40px;font-size:28px;animation:rise 3s linear forwards;pointer-events:none}
+@keyframes rise{to{transform:translateY(-110vh) rotate(25deg);opacity:0}}
+.cg{position:fixed;z-index:40;font-size:40px;background:none;padding:4px;box-shadow:none;animation:pop .25s ease-out,fade 2.2s linear forwards;line-height:1}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes fade{0%,70%{opacity:1}100%{opacity:0}}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="emoji" id="emoji">🥺</div>
+  <div id="msg"></div>
+  <div class="row" id="nextRow"><button class="primary" id="next">Next</button></div>
+  <div class="row hidden" id="answerRow">
+    <button class="primary" id="yes">Yes 💖</button>
+    <span id="noSlot"><button class="ghost" id="no" tabindex="-1">No</button></span>
+  </div>
+  <div id="taunt"></div>
+  <div class="sign" id="sign"></div>
+</div>
+
+<script>
+var steps=[
+ ["🥺","kadoli… hey. before you close this, give me 30 seconds please 🙏"],
+ ["📱","so I saw your message and left you on seen. I know. I’m not even gonna pretend I had a reason 😩"],
+ ["😔","I felt bad the second I realised what I did. you were waiting on your side and I just went quiet. that wasn’t fair on you babe 💔"],
+ ["🥹","you mean so much to me, you know that? you’re literally the first person I wanna tell everything to. I should’ve replied right away 🤍"],
+ ["🫶","I’m sorry for making you wait and wonder. you didn’t deserve that, not even for one minute 🌹"],
+ ["🎮","anyway… since I’m clearly the king of leaving people waiting 😅 I made you a small game. don’t judge my skills"],
+ ["GAME",""],
+ ["😏","look at you, undefeated 😂 you caught every single one. just like you caught me 🫶"],
+ ["💌","ok last one, and I’m replying to this one on time, promise 🤞"]
+];
+var i=0,msg=document.getElementById("msg"),emoji=document.getElementById("emoji"),nextRow=document.getElementById("nextRow");
+function show(){
+  msg.style.opacity=0;
+  setTimeout(function(){
+    emoji.textContent=steps[i][0];
+    msg.textContent=steps[i][1];
+    msg.style.opacity=1;
+  },250);
+}
+function askQuestion(){
+  nextRow.classList.add("hidden");
+  document.getElementById("answerRow").classList.remove("hidden");
+  msg.style.opacity=0;
+  setTimeout(function(){
+    emoji.textContent="💌";
+    msg.textContent="so… have you forgiven me? 🥺👉👈";
+    msg.style.opacity=1;
+  },250);
+}
+show();
+document.getElementById("next").onclick=function(){
+  i++;
+  if(i>=steps.length){askQuestion();return;}
+  if(steps[i][0]==="GAME"){startGame();return;}
+  show();
+};
+
+/* playful game: catch 7 hearts */
+var caught=0,spawner=null;
+var notes=["1/7 💗 ok that’s one sorry","2/7 📈 my reply speed is getting better I swear","3/7 😤 my phone is on trial right now","4/7 🍫 chocolate loading… (kidding, or not 😏)","5/7 🙈 I’ll never leave you on seen again","6/7 🥹 one more, you’re too good at this","7/7 🎉 you did it!"];
+function startGame(){
+  nextRow.classList.add("hidden");
+  emoji.textContent="💗";
+  msg.textContent="ok catch 7 hearts before they disappear 💗 go go go 👆";
+  caught=0;
+  spawner=setInterval(spawn,650);
+  spawn();
+}
+function spawn(){
+  var b=document.createElement("button");
+  b.className="cg";
+  b.textContent=["💗","💖","💘","💕"][Math.floor(Math.random()*4)];
+  b.style.left=(8+Math.random()*(window.innerWidth-80))+"px";
+  b.style.top=(60+Math.random()*(window.innerHeight-140))+"px";
+  var done=false;
+  function hit(e){
+    e.preventDefault();
+    if(done)return;done=true;b.remove();
+    msg.textContent=notes[caught];
+    caught++;
+    if(caught>=7){
+      clearInterval(spawner);
+      setTimeout(function(){
+        i++;show();
+        nextRow.classList.remove("hidden");
+      },900);
+    }
+  }
+  b.addEventListener("pointerdown",hit);
+  document.body.appendChild(b);
+  setTimeout(function(){if(!done){done=true;b.remove();}},2200);
+}
+
+/* the No button runs away */
+var no=document.getElementById("no"),yes=document.getElementById("yes"),taunt=document.getElementById("taunt");
+var taunts=["nice try 😏","too slow 🐢","even I reply faster than that 😭","seen ✓✓ (the button saw you coming)","oops wrong button 🙈","you’re cute when you chase 😂","ok that’s enough, just press yes 😭"];
+var dodging=false,lastX=-999,lastY=-999,yesScale=1,tcount=0;
+function jump(){
+  var w=no.offsetWidth||80,h=no.offsetHeight||48,pad=12;
+  var vw=window.innerWidth,vh=window.innerHeight;
+  var x,y,tries=0;
+  do{
+    x=pad+Math.random()*(vw-w-2*pad);
+    y=pad+Math.random()*(vh-h-2*pad);
+    tries++;
+  }while(tries<30&&Math.hypot(x+w/2-lastX,y+h/2-lastY)<180);
+  if(!dodging){
+    var r=no.getBoundingClientRect();
+    no.classList.add("fixed");
+    no.style.left=r.left+"px";no.style.top=r.top+"px";
+    dodging=true;
+  }
+  no.style.opacity=0;
+  setTimeout(function(){
+    no.style.left=x+"px";no.style.top=y+"px";
+    no.style.opacity=1;
+  },130);
+  yesScale=Math.min(yesScale+0.06,1.6);
+  yes.style.transform="scale("+yesScale+")";
+  taunt.textContent=taunts[tcount%taunts.length];tcount++;
+}
+function near(e){
+  var r=no.getBoundingClientRect();
+  var cx=r.left+r.width/2,cy=r.top+r.height/2;
+  lastX=e.clientX;lastY=e.clientY;
+  if(Math.hypot(e.clientX-cx,e.clientY-cy)<120){jump();}
+}
+document.addEventListener("pointermove",near);
+["pointerdown","touchstart","mousedown","click","focus"].forEach(function(ev){
+  no.addEventListener(ev,function(e){e.preventDefault();e.stopPropagation();jump();},{passive:false});
+});
+
+/* the Yes button wins */
+yes.onclick=function(){
+  document.getElementById("answerRow").classList.add("hidden");
+  no.classList.add("hidden");
+  taunt.textContent="";
+  emoji.textContent="🥰";
+  msg.textContent="she said yes!! 🥳 replying in 0.001 seconds ⚡ (unlike me 😅). thank you kadoli, I love you so much ❤️";
+  document.getElementById("sign").textContent="— Ignitious";
+  for(var k=0;k<30;k++){
+    (function(k){setTimeout(function(){
+      var h=document.createElement("div");
+      h.className="heart";
+      h.textContent=["💖","💗","💕","❤️","💘"][k%5];
+      h.style.left=Math.random()*95+"vw";
+      document.body.appendChild(h);
+      setTimeout(function(){h.remove()},3200);
+    },k*120)})(k);
+  }
+};
+</script>
+</body>
+</html>
